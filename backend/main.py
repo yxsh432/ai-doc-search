@@ -23,8 +23,8 @@ app = FastAPI(title="PDF RAG Chatbot API")
 # Add CORS Middleware to allow Next.js frontend to connect
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"], # For production, replace with your frontend URL
-    allow_credentials=True,
+    allow_origins=["*"], # Allow all origins for easier deployment
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
