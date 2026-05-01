@@ -11,3 +11,4 @@ langchain-chroma
 pypdf
 chromadb
 google-generativeai
+docx2txt

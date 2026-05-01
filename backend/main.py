@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader, TextLoader, Docx2txtLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_chroma import Chroma
@@ -37,7 +37,7 @@ DB_DIR = os.path.join(os.path.dirname(__file__), "db")
 embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
 
 # Initialize LLM
-# Using Gemini 1.5 Flash (optimized for speed and RAG context windows)
+# Using Gemini 2.5 Flash
 llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.2)
 
 class ChatRequest(BaseModel):
@@ -48,22 +48,30 @@ def read_root():
     return {"message": "Welcome to the PDF RAG Chatbot API"}
 
 @app.post("/upload")
-async def upload_pdf(file: UploadFile = File(...)):
+async def upload_file(file: UploadFile = File(...)):
     """
-    Handles PDF upload, splits text into chunks, creates embeddings, 
+    Handles file upload (PDF, DOCX, TXT), splits text into chunks, creates embeddings, 
     and persists them to ChromaDB with metadata.
     """
-    if not file.filename.endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+    allowed_extensions = (".pdf", ".docx", ".txt")
+    if not file.filename.lower().endswith(allowed_extensions):
+        raise HTTPException(status_code=400, detail="Only PDF, DOCX, and TXT files are allowed")
     
     try:
         # Save the uploaded file temporarily
-        with NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+        ext = os.path.splitext(file.filename)[1]
+        with NamedTemporaryFile(delete=False, suffix=ext) as tmp_file:
             shutil.copyfileobj(file.file, tmp_file)
             tmp_path = tmp_file.name
 
-        # 1. Load PDF and extract metadata (page numbers included by default)
-        loader = PyPDFLoader(tmp_path)
+        # 1. Load document and extract metadata
+        if ext.lower() == ".pdf":
+            loader = PyPDFLoader(tmp_path)
+        elif ext.lower() == ".docx":
+            loader = Docx2txtLoader(tmp_path)
+        else:
+            loader = TextLoader(tmp_path, encoding='utf-8')
+        
         docs = loader.load()
 
         # Add source filename to metadata for citation support
