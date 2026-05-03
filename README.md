@@ -1,7 +1,5 @@
 # 🧠 AI Doc Search: Premium RAG Chatbot
 
-![Project Banner](https://github.com/user-attachments/assets/thumbnail-placeholder)
-
 An intelligent, full-stack Document Search & Analysis platform powered by **Retrieval-Augmented Generation (RAG)**. This application allows users to upload PDF documents and engage in context-aware conversations with an AI that cites specific sources and page numbers.
 
 ---
@@ -73,7 +71,7 @@ Open [http://localhost:3000](http://localhost:3000) to start searching!
 
 | Landing Page | Chat Interface |
 | :---: | :---: |
-| ![Welcome](https://github.com/user-attachments/assets/screenshot-1) | ![Chat](https://github.com/user-attachments/assets/screenshot-2) |
+| ![Welcome](./screenshots/welcomepage.png) | ![Chat](./screenshots/chatinterface.png) |
 
 ---
 
